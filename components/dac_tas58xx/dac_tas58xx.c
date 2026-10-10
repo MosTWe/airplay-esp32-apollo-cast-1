@@ -264,7 +264,11 @@ static int s_dev_count = 0;
 static i2c_master_bus_handle_t s_bus_handle = NULL;
 
 /* Whether the primary amplifier is bridged (PBTL) mono. Read at init only. */
+#ifdef CONFIG_TAS58XX_FORCE_PBTL
+static bool s_first_pbtl = CONFIG_TAS58XX_FORCE_PBTL;
+#else
 static bool s_first_pbtl = false;
+#endif
 /* The wiring the primary chip was actually brought up in. PBTL is only
  * writable during init, so a change made later must not alter how the running
  * chip is driven until the user has rewired and restarted. */
