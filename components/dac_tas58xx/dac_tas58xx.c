@@ -328,6 +328,7 @@ static tas58xx_dev_t *s_cur = NULL;
  * lock also guards s_cur, which selects the target chip.
  */
 static SemaphoreHandle_t s_reg_mutex = NULL;
+static uint32_t s_power_mode_generation = 0;
 
 #define REG_LOCK()   xSemaphoreTake(s_reg_mutex, portMAX_DELAY)
 #define REG_UNLOCK() xSemaphoreGive(s_reg_mutex)
@@ -1544,6 +1545,7 @@ static void set_power_mode_dev(tas58xx_dev_t *dev, dac_power_mode_t mode) {
 /* Fan a power-mode change out to every managed chip. */
 static void tas58xx_set_power_mode(dac_power_mode_t mode) {
   REG_LOCK();
+  s_power_mode_generation++;
   for (int i = 0; i < s_dev_count; i++) {
     set_power_mode_dev(&s_devs[i], mode);
   }
@@ -3098,7 +3100,9 @@ static void tas58xx_on_i2s_started(uint32_t sample_rate_hz) {
   }
 
   bool was_playing[TAS58XX_MAX_DEVICES] = {false};
+  uint32_t power_mode_generation;
   REG_LOCK();
+  power_mode_generation = s_power_mode_generation;
   for (int device_index = 0; device_index < s_dev_count; device_index++) {
     s_cur = &s_devs[device_index];
     uint8_t ctrl2 = 0;
@@ -3116,16 +3120,17 @@ static void tas58xx_on_i2s_started(uint32_t sample_rate_hz) {
   tas58xx_reload_hf_for_rate();
   bq_reprogram_all();
 
+  REG_LOCK();
+  bool power_mode_unchanged = s_power_mode_generation == power_mode_generation;
   for (int device_index = 0; device_index < s_dev_count; device_index++) {
-    if (!was_playing[device_index]) {
+    if (!power_mode_unchanged || !was_playing[device_index]) {
       continue;
     }
 
     ESP_LOGI(TAG, "@0x%02X restoring PLAY after I2S rate change",
              s_devs[device_index].addr);
-    REG_LOCK();
     set_power_mode_dev(&s_devs[device_index], DAC_POWER_ON);
-    s_cur = NULL;
-    REG_UNLOCK();
   }
+  s_cur = NULL;
+  REG_UNLOCK();
 }
