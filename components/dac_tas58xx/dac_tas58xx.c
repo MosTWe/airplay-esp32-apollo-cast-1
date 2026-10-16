@@ -1530,7 +1530,9 @@ static void set_power_mode_dev(tas58xx_dev_t *dev, dac_power_mode_t mode) {
 
     tas58xx_dump_status("power-on");
   } else if (mode == DAC_POWER_STANDBY) {
-    tas58xx_write_reg(REG_DEVICE_CTRL2, CTRL2_HIZ);
+    if (cur_state != CTRL2_DEEP_SLEEP) {
+      tas58xx_write_reg(REG_DEVICE_CTRL2, CTRL2_HIZ);
+    }
   } else {
     tas58xx_write_reg(REG_DEVICE_CTRL2, CTRL2_DEEP_SLEEP);
     /* DEEP_SLEEP may reset registers and coefficient RAM — ensure
@@ -3095,10 +3097,36 @@ static void tas58xx_on_i2s_started(uint32_t sample_rate_hz) {
     return;
   }
 
+  bool was_playing[TAS58XX_MAX_DEVICES] = {false};
+  REG_LOCK();
+  for (int device_index = 0; device_index < s_dev_count; device_index++) {
+    s_cur = &s_devs[device_index];
+    uint8_t ctrl2 = 0;
+    if (tas58xx_read_reg(REG_DEVICE_CTRL2, &ctrl2) == ESP_OK) {
+      was_playing[device_index] =
+          (ctrl2 & CTRL2_STATE_MASK) == CTRL2_PLAY;
+    }
+  }
+  s_cur = NULL;
+  REG_UNLOCK();
+
   ESP_LOGI(TAG, "I2S now %" PRIu32 " Hz (was %.0f), redesigning filters",
            sample_rate_hz, s_bq_fs);
   s_bq_fs = (double)sample_rate_hz;
 
   tas58xx_reload_hf_for_rate();
   bq_reprogram_all();
+
+  for (int device_index = 0; device_index < s_dev_count; device_index++) {
+    if (!was_playing[device_index]) {
+      continue;
+    }
+
+    ESP_LOGI(TAG, "@0x%02X restoring PLAY after I2S rate change",
+             s_devs[device_index].addr);
+    REG_LOCK();
+    set_power_mode_dev(&s_devs[device_index], DAC_POWER_ON);
+    s_cur = NULL;
+    REG_UNLOCK();
+  }
 }
