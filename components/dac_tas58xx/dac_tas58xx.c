@@ -3103,8 +3103,7 @@ static void tas58xx_on_i2s_started(uint32_t sample_rate_hz) {
     s_cur = &s_devs[device_index];
     uint8_t ctrl2 = 0;
     if (tas58xx_read_reg(REG_DEVICE_CTRL2, &ctrl2) == ESP_OK) {
-      was_playing[device_index] =
-          (ctrl2 & CTRL2_STATE_MASK) == CTRL2_PLAY;
+      was_playing[device_index] = (ctrl2 & CTRL2_STATE_MASK) == CTRL2_PLAY;
     }
   }
   s_cur = NULL;
