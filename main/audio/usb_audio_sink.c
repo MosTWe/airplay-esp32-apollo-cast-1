@@ -59,10 +59,10 @@ static const char *TAG = "usb_sink";
 
 #define BYTES_PER_FRAME 4 // 16-bit stereo
 
-// ~100 ms of slack between the USB stack and I2S, primed with ~20 ms so
+// ~50 ms of slack between the USB stack and I2S, primed with ~20 ms so
 // the first writes don't immediately underrun.
 #define RINGBUF_SIZE \
-  ((size_t)(CONFIG_OUTPUT_SAMPLE_RATE_HZ / 10) * BYTES_PER_FRAME)
+  ((size_t)(CONFIG_OUTPUT_SAMPLE_RATE_HZ / 20) * BYTES_PER_FRAME)
 #define RINGBUF_PREFETCH \
   ((size_t)(CONFIG_OUTPUT_SAMPLE_RATE_HZ / 50) * BYTES_PER_FRAME)
 
