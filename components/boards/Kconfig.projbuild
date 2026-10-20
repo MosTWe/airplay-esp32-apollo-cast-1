@@ -128,6 +128,11 @@ menu "Board Configuration"
             bool "Amped-Esparagus-Plus-S3 (ESP32-S3, PCM5122 + TPA3118)"
             depends on IDF_TARGET_ESP32S3
 
+        config BOARD_APOLLO_CAST_1
+            bool "Apollo Automation CAST-1 (ESP32-S3, PCM5122)"
+            depends on IDF_TARGET_ESP32S3
+            select DAC_PCM51XX
+
     endchoice
 
     config BOARD_TARGET_PATH
@@ -162,6 +167,7 @@ menu "Board Configuration"
         default "loud-esp32" if BOARD_AMPED_ESP32_S3
         default "loud-esp32" if BOARD_AMPED_ESPARAGUS
         default "amped-esparagus-plus-s3" if BOARD_AMPED_ESPARAGUS_PLUS_S3
+        default "apollo-cast-1" if BOARD_APOLLO_CAST_1
 
     config BOARD_SQUEEZEAMP_COMMON
         bool
