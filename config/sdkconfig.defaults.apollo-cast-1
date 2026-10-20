@@ -1,0 +1,39 @@
+# Apollo Automation CAST-1 defaults (ESP32-S3, PCM5122 I2C DAC, 3.5mm line
+# out). Pin map from Apollo's ESPHome Core.yaml (ApolloAutomation/CAST-1).
+# Wi-Fi + audio only: the optional W5500 Ethernet header and the WS2812 LEDs
+# are left off.
+CONFIG_BOARD_APOLLO_CAST_1=y
+
+# 8MB flash (Apollo's firmware declares 8MB), octal PSRAM. Apollo builds with
+# DIO flash mode, so match it rather than the project's QIO default.
+CONFIG_ESPTOOLPY_FLASHSIZE_8MB=y
+CONFIG_ESPTOOLPY_FLASHSIZE="8MB"
+CONFIG_ESPTOOLPY_FLASHMODE_QIO=n
+CONFIG_ESPTOOLPY_FLASHMODE_DIO=y
+CONFIG_ESPTOOLPY_FLASHMODE="dio"
+CONFIG_SPIRAM_MODE_OCT=y
+
+# Shared PCM512x driver: PLL from BCK, MCLK-missing detection masked,
+# hardware digital volume. 0 dB analog gain (2V RMS line level, as Apollo).
+CONFIG_DAC_PCM51XX=y
+CONFIG_DAC_CONTROLS_VOLUME=y
+CONFIG_PCM51XX_I2C_ADDR=0x4D
+
+# I2S: 3-wire, no MCLK
+CONFIG_I2S_SCK_IO=-1
+CONFIG_I2S_BCK_IO=14
+CONFIG_I2S_WS_IO=10
+CONFIG_I2S_DO_IO=9
+CONFIG_I2S_GND_IO=-1
+CONFIG_I2S_VCC_IO=-1
+
+# I2C to the PCM5122
+CONFIG_DAC_I2C_SDA=47
+CONFIG_DAC_I2C_SCL=48
+
+# No XSMT/mute, amp-enable, battery, LEDs or extra buttons in this build
+CONFIG_DAC_ENABLE_GPIO=-1
+CONFIG_LED_RGB_GPIO=-1
+CONFIG_LED_STATUS_GPIO=-1
+CONFIG_LED_ERROR_GPIO=-1
+CONFIG_BAT_CHANNEL=-1

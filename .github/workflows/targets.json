@@ -6,6 +6,12 @@
     "core": true
   },
   {
+    "name": "apollo-cast-1",
+    "target": "esp32s3",
+    "sdkconfig": "config/sdkconfig.defaults;config/sdkconfig.defaults.apollo-cast-1",
+    "core": true
+  },
+  {
     "name": "waveshare-esp32s3",
     "target": "esp32s3",
     "sdkconfig": "config/sdkconfig.defaults;config/sdkconfig.defaults.waveshare-esp32s3",
